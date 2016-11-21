@@ -13,7 +13,8 @@ description = {
 }
 
 dependencies = {
-    "lua"
+    "lua",
+    "luarocks-fetch-gitrec",
 }
 
 build = {
