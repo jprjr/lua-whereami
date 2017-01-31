@@ -9,7 +9,7 @@ int lua_whereami(lua_State *L) {
     char *path;
 
     length = wai_getExecutablePath(NULL,0,&dirname_length);
-    path = (char*)malloc(length + 1);
+    path = (char*)lua_newuserdata(L, length + 1);
     if(!path) {
         lua_pushnil(L);
         lua_pushnil(L);
@@ -19,7 +19,6 @@ int lua_whereami(lua_State *L) {
     path[length] = '\0';
     lua_pushstring(L,path);
     lua_pushnil(L);
-    free(path);
     return 2;
 }
 
