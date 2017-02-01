@@ -20,7 +20,8 @@ dependencies = {
 build = {
     type = "builtin",
     modules = {
-        whereami = {
+        ['whereami'] = 'whereami.lua',
+        ['whereami.core'] = {
             sources = { "lua-whereami.c","whereami/src/whereami.c" },
             incdirs = { "whereami/src" }
         }
