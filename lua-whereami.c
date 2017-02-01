@@ -22,7 +22,7 @@ int lua_whereami(lua_State *L) {
     return 2;
 }
 
-int luaopen_whereami(lua_State *L) {
+int luaopen_whereami_core(lua_State *L) {
     lua_pushcfunction(L,lua_whereami);
     return 1;
 }
