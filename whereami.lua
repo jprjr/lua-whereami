@@ -1,8 +1,24 @@
+local modname = { 'whereami','core' }
+local concat = table.concat
+
 local ok, ffi = pcall(require,'ffi')
-if ok then
-    ffi.cdef[[
+if not ok then
+    return require(concat(modname,'.'))
+end
+
+local wai_getExe
+
+ffi.cdef[[
 int wai_getExecutablePath(char* out, int capacity, int* dirname_length);
 ]]
+
+pcall(function()
+    if ffi.C.wai_getExecutablePath then
+        wai_getExe = ffi.C.wai_getExecutablePath
+    end
+end)
+
+if not wai_getExe then
     local dir_sep, sep, sub
     local gmatch = string.gmatch
     local match = string.match
@@ -30,8 +46,7 @@ int wai_getExecutablePath(char* out, int capacity, int* dirname_length);
     end
 
     local function load_lib()
-       local so_name = 'whereami' .. dir_sep .. 'core'
-       local so_path = find_lib(so_name)
+       local so_path = find_lib(concat(modname,dir_sep))
        if so_path then
            return ffi.load(so_path)
        end
@@ -39,15 +54,18 @@ int wai_getExecutablePath(char* out, int capacity, int* dirname_length);
 
     local lib = load_lib()
     if lib then
-        return function()
-            local path_size = lib.wai_getExecutablePath(nil,0,nil)
-            local path = ffi.new("char[?]",path_size)
-            local res = lib.wai_getExecutablePath(path,path_size,nil)
-            return ffi.string(path,path_size), nil
-        end
+        wai_getExe = lib.wai_getExecutablePath
     end
-
-    return nil,'failed to load module'
-else
-    return require'whereami.core'
 end
+
+if not wai_getExe then
+    return nil,'failed to load module'
+end
+
+return function()
+    local path_size = wai_getExe(nil,0,nil)
+    local path = ffi.new("char[?]",path_size)
+    local res = wai_getExe(path,path_size,nil)
+    return ffi.string(path,path_size), nil
+end
+
