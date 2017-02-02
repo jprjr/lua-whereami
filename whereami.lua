@@ -6,7 +6,7 @@ if not ok then
     return require(concat(modname,'.'))
 end
 
-local wai_getExe
+local wai_lib
 
 ffi.cdef[[
 int wai_getExecutablePath(char* out, int capacity, int* dirname_length);
@@ -14,11 +14,11 @@ int wai_getExecutablePath(char* out, int capacity, int* dirname_length);
 
 pcall(function()
     if ffi.C.wai_getExecutablePath then
-        wai_getExe = ffi.C.wai_getExecutablePath
+        wai_lib = ffi.C
     end
 end)
 
-if not wai_getExe then
+if not wai_lib then
     local dir_sep, sep, sub
     local gmatch = string.gmatch
     local match = string.match
@@ -52,20 +52,17 @@ if not wai_getExe then
        end
     end
 
-    local lib = load_lib()
-    if lib then
-        wai_getExe = lib.wai_getExecutablePath
-    end
+    wai_lib = load_lib()
 end
 
-if not wai_getExe then
+if not wai_lib then
     return nil,'failed to load module'
 end
 
 return function()
-    local path_size = wai_getExe(nil,0,nil)
+    local path_size = wai_lib.wai_getExecutablePath(nil,0,nil)
     local path = ffi.new("char[?]",path_size)
-    local res = wai_getExe(path,path_size,nil)
+    local res = wai_lib.wai_getExecutablePath(path,path_size,nil)
     return ffi.string(path,path_size), nil
 end
 
